@@ -8,6 +8,9 @@ app.set("view engine", "ejs"); // use ejs as the template engine
 //listen for requests
 app.listen(4401);
 
+// middleware and static files
+app.use(express.static("public"));
+
 app.get("/", (req, res) => {
 	const blogs = [
 		{ title: "Hello titans", body: "love your great spirit" },
