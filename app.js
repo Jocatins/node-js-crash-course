@@ -21,58 +21,65 @@ app.set("view engine", "ejs"); // use ejs as the template engine
 
 // middleware and static files
 app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
 
-// mongoose and mongo sandbox routes
-app.get("/add-blog", (req, res) => {
-	const blog = new Blog({
-		title: "titan blogs",
-		snippet: "About titans",
-		body: "More about titans",
-	});
-	blog.save()
-		.then((result) => {
-			res.send(result);
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-});
-
-// ----------------------ALL BLOGS------------------------------------------
-app.get("/all-blogs", (req, res) => {
-	Blog.find()
-		.then((result) => {
-			res.send(result);
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-});
-// -------------------SINGLE BLOGS-------------------------------------------
-app.get("/single-blog", (req, res) => {
-	Blog.findById("64b9498f8f820547eca17dce")
-		.then((result) => {
-			res.send(result);
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-});
-
+// basic routes
 app.get("/", (req, res) => {
-	const blogs = [
-		{ title: "Hello titans", body: "love your great spirit" },
-		{ title: "Hello gypsies", body: "love your great spirit" },
-	];
-
-	res.render("index", { title: "Home of titans", blogs });
+	res.redirect("/blogs");
 });
 app.get("/about", (req, res) => {
 	res.render("about", { title: "About titans" });
 });
 
+// blog routes
+app.get("/blogs", (req, res) => {
+	Blog.find()
+		.sort({ createdAt: -1 })
+		.then((result) => {
+			res.render("index", { title: "All Blogs", blogs: result });
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+});
+// POST HANDLER
+app.post("/blogs", (req, res) => {
+	console.log(req.body);
+	const blog = new Blog(req.body);
+
+	blog.save()
+		.then((result) => {
+			res.redirect("/blogs");
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+});
+
 app.get("/blogs/create", (req, res) => {
 	res.render("create", { title: "Create a new blog" });
+});
+app.get("/blogs/:id", (req, res) => {
+	const id = req.params.id;
+	Blog.findById(id)
+		.then((result) => {
+			res.render("details", { blog: result, title: "Blog Details" });
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+});
+
+app.delete("/blogs/:id", (req, res) => {
+	const id = req.params.id;
+
+	Blog.findByIdAndDelete(id)
+		.then((result) => {
+			res.json({ redirect: "/blogs" });
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 });
 
 // 404 page
