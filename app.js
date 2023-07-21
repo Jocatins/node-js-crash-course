@@ -31,7 +31,7 @@ app.get("/about", (req, res) => {
 	res.render("about", { title: "About titans" });
 });
 // blog routes
-app.use(BlogRoutes);
+app.use("/blogs", BlogRoutes);
 
 // 404 page
 app.use((req, res) => {
